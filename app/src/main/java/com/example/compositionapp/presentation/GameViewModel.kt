@@ -1,10 +1,12 @@
-package com.example.compositionapp.presentation.fragments
+package com.example.compositionapp.presentation
 
 import android.app.Application
 import android.os.CountDownTimer
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import com.example.compositionapp.R
 import com.example.compositionapp.data.GameRepositoryImpl
 import com.example.compositionapp.domain.entity.GameResult
@@ -14,10 +16,12 @@ import com.example.compositionapp.domain.entity.Question
 import com.example.compositionapp.domain.usecase.GenerateQuestionUseCase
 import com.example.compositionapp.domain.usecase.GetGameSettingsUseCase
 
-class GameViewModel(application: Application) : AndroidViewModel(application) {
+class GameViewModel(
+    private val application: Application,
+    private val level: Level
+) : AndroidViewModel(application) {
 
     private lateinit var gameSettings: GameSettings
-    private lateinit var level: Level
 
     private val context = application
 
@@ -54,10 +58,15 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     private var countOfRightAnswer = 0
     private var countOfQuestion = 0
 
-    fun startGame(level: Level) {
-        getGameSettings(level)
+    init {
+        startGame()
+    }
+
+    private fun startGame() {
+        getGameSettings()
         startTimer()
         generateQuestion()
+        updateProgress()
     }
 
     fun chooseAnswer(number: Int) {
@@ -100,8 +109,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         countOfQuestion++
     }
 
-    private fun getGameSettings(level: Level) {
-        this.level = level
+    private fun getGameSettings() {
         this.gameSettings = getGameSettingsUseCase(level)
         _minPercent.value = gameSettings.minPercentOfRightAnswers
     }
@@ -143,4 +151,16 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         private const val SECONDS_IN_MINUTES = 60
     }
 
+}
+
+class GameViewModelFactory(
+    private val application: Application,
+    private val level: Level
+) : ViewModelProvider.Factory {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        if (modelClass.isAssignableFrom(GameViewModel::class.java)) {
+            return GameViewModel(application, level) as T
+        }
+        throw RuntimeException("Unknown view model class $modelClass")
+    }
 }
