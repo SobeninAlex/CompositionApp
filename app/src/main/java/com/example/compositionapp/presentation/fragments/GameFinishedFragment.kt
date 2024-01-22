@@ -48,6 +48,7 @@ class GameFinishedFragment : Fragment() {
     }
 
     private fun bindViews() {
+        binding.gameResult = args.gameResult
         with(binding) {
             emojiResult.setImageResource(getSmileResourcesId())
 
