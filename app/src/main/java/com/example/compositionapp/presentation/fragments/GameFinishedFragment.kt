@@ -38,8 +38,10 @@ class GameFinishedFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        setupClickListeners()
-        bindViews()
+        binding.apply {
+            gameResult = args.gameResult
+            gameFinishedFragment = this@GameFinishedFragment
+        }
     }
 
     override fun onDestroyView() {
@@ -47,56 +49,7 @@ class GameFinishedFragment : Fragment() {
         _binding = null
     }
 
-    private fun bindViews() {
-        binding.gameResult = args.gameResult
-        with(binding) {
-            emojiResult.setImageResource(getSmileResourcesId())
-
-            tvRequiredAnswer.text = String.format(
-                getString(R.string.required_score),
-                gameResult.gameSettings.minCountOfRightAnswers
-            )
-
-            tvScoreAnswer.text = String.format(
-                getString(R.string.score_answers),
-                gameResult.countOfRightAnswers
-            )
-
-            tvRequiredPercentage.text = String.format(
-                getString(R.string.required_percentage),
-                gameResult.gameSettings.minPercentOfRightAnswers
-            )
-
-            tvScorePercentage.text = String.format(
-                getString(R.string.score_percentage),
-                getPercentOfRightAnswers()
-            )
-        }
-    }
-
-    private fun getSmileResourcesId(): Int {
-        return if (gameResult.winner) {
-            R.drawable.ic_smile
-        } else {
-            R.drawable.ic_sad
-        }
-    }
-
-    private fun getPercentOfRightAnswers() = with(gameResult) {
-        if (countOfQuestions == 0) {
-            0
-        } else {
-            ((countOfRightAnswers / countOfQuestions.toDouble()) * 100).toInt()
-        }
-    }
-
-    private fun setupClickListeners() {
-        binding.butRetry.setOnClickListener {
-            retryGame()
-        }
-    }
-
-    private fun retryGame() {
+    fun retryGame() {
         findNavController().popBackStack()
     }
 
